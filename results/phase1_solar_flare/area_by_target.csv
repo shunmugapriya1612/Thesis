@@ -1,0 +1,5 @@
+Target,count,mean,std,min,median,max
+Common Flare,125,1.064,0.246,1,1.0,2
+Moderate Flare,50,1.08,0.274,1,1.0,2
+No Flare,1203,1.017,0.128,1,1.0,2
+Severe Flare,11,1.364,0.505,1,1.0,2

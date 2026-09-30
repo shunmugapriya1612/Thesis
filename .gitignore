@@ -1,0 +1,7 @@
+.venv/
+thesis_ml_env/
+__pycache__/
+*.pyc
+.DS_Store
+.ipynb_checkpoints/
+Data/household_power_consumption.txt

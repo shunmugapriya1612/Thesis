@@ -1,0 +1,8 @@
+Method,Evaluations,CV Folds per Evaluation,Resource Units,CV Model Fits
+Random Search,6,5,15000,30
+Bayesian Optimization,6,5,15000,30
+Hyperband,12,5,15000,60
+LEA,6,5,15000,30
+TLBO,6,5,15000,30
+Simulated Annealing,6,5,15000,30
+Differential Evolution,6,5,15000,30

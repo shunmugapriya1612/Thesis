@@ -72,6 +72,7 @@
 #
 
 import random
+import os   
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_val_score, train_test_split
@@ -86,7 +87,13 @@ from sklearn.metrics import (
     classification_report,
     confusion_matrix,
 )
+import warnings
+from sklearn.exceptions import ConvergenceWarning
 
+warnings.filterwarnings(
+    "ignore",
+    category=ConvergenceWarning
+)
 dataset = pd.read_csv(
     "processed_datasets/appliance_energy_clustered.csv"
 )
@@ -96,7 +103,16 @@ print(dataset.shape)
 
 print("\nFirst Five Rows:")
 print(dataset.head())
+# =====================================================
+# VISUALIZATION OUTPUT DIRECTORY
+# =====================================================
 
+VISUALIZATION_DIR = "results/phase2_appliance_energy/visualizations"
+
+os.makedirs(
+    VISUALIZATION_DIR,
+    exist_ok=True
+)
 
 # =====================================================
 # FEATURE MATRIX AND TARGET VARIABLE
@@ -427,7 +443,7 @@ def train_mlp_model(model, X_train, y_train):
 # VISUALIZE TRAINING LOSS
 # =====================================================
 
-def plot_training_loss(model, title):
+def plot_training_loss(model, title, filename):
 
     plt.figure(figsize=(8,5))
 
@@ -441,7 +457,15 @@ def plot_training_loss(model, title):
 
     plt.grid(True)
 
+    plt.savefig(
+        filename,
+        dpi=300,
+        bbox_inches="tight"
+    )
+
     plt.show()
+
+    plt.close()
 
 # =====================================================
 # PRINT OPTIMIZATION SUMMARY
@@ -641,7 +665,9 @@ plot_training_loss(
 
     baseline_model,
 
-    "Baseline MLP Training Loss"
+    "Baseline MLP Training Loss",
+
+    "01_baseline_mlp_training_loss.png"
 
 )
 
@@ -747,7 +773,7 @@ random_search = RandomizedSearchCV(
 
     param_distributions=SEARCH_SPACE,
 
-    n_iter=20,
+    n_iter=5,
 
     scoring="f1_weighted",
 
@@ -868,10 +894,11 @@ plot_training_loss(
 
     random_model,
 
-    "Random Search Optimized MLP Training Loss"
+    "Random Search Optimized MLP Training Loss",
+
+    "02_random_search_training_loss.png"
 
 )
-
 # =====================================================
 # RANDOM SEARCH SUMMARY
 # =====================================================
@@ -971,21 +998,34 @@ from sklearn.model_selection import cross_val_score
 
 def objective(trial):
 
+    hidden_layer_name = trial.suggest_categorical(
+
+        "hidden_layer_sizes",
+
+        [
+            "16",
+            "32",
+            "64",
+            "32_16",
+            "64_32"
+        ]
+
+    )
+
+    hidden_layer_mapping = {
+
+        "16": (16,),
+        "32": (32,),
+        "64": (64,),
+        "32_16": (32, 16),
+        "64_32": (64, 32)
+
+    }
+
     params = {
 
-        "hidden_layer_sizes": trial.suggest_categorical(
-
-            "hidden_layer_sizes",
-
-            [
-                (16,),
-                (32,),
-                (64,),
-                (32, 16),
-                (64, 32)
-            ]
-
-        ),
+        "hidden_layer_sizes":
+            hidden_layer_mapping[hidden_layer_name],
 
         "activation": trial.suggest_categorical(
 
@@ -1073,7 +1113,7 @@ study.optimize(
 
     objective,
 
-    n_trials=20
+    n_trials=5
 
 )
 
@@ -1104,7 +1144,23 @@ print(
 # independent test dataset.
 # =====================================================
 
-best_params = study.best_params
+best_params = study.best_params.copy()
+
+# Convert Optuna hidden-layer string back to
+# the tuple format required by MLPClassifier
+hidden_layer_mapping = {
+
+    "16": (16,),
+    "32": (32,),
+    "64": (64,),
+    "32_16": (32, 16),
+    "64_32": (64, 32)
+
+}
+
+best_params["hidden_layer_sizes"] = hidden_layer_mapping[
+    best_params["hidden_layer_sizes"]
+]
 
 print("\nBest Hyperparameters Found\n")
 
@@ -1113,9 +1169,7 @@ for key, value in best_params.items():
     print(f"{key}: {value}")
 
 bayesian_model = build_mlp(
-
     best_params
-
 )
 # =====================================================
 # TRAIN OPTIMIZED MODEL
@@ -1177,7 +1231,9 @@ plot_training_loss(
 
     bayesian_model,
 
-    "Bayesian Optimized MLP Training Loss"
+    "Bayesian Optimized MLP Training Loss",
+
+    "03_bayesian_optimization_training_loss.png"
 
 )
 # =====================================================
@@ -1335,6 +1391,8 @@ hyperband = HalvingRandomSearchCV(
 
     max_resources=500,
 
+    n_candidates=5,
+
     scoring="f1_weighted",
 
     cv=5,
@@ -1410,7 +1468,9 @@ plot_training_loss(
 
     hyperband_model,
 
-    "Hyperband Optimized MLP Training Loss"
+    "Hyperband Optimized MLP Training Loss",
+
+    "04_hyperband_training_loss.png"
 
 )
 
@@ -1535,7 +1595,7 @@ POPULATION_SIZE = 20
 
 SURVIVAL_RATE = 0.50
 
-MAX_ITERATIONS = 20
+MAX_ITERATIONS = 5
 
 # =====================================================
 # GENERATE INITIAL POPULATION
@@ -1754,7 +1814,9 @@ plot_training_loss(
 
     lea_model,
 
-    "LEA Optimized MLP Training Loss"
+    "LEA Optimized MLP Training Loss",
+
+    "05_lea_training_loss.png"
 
 )
 
@@ -1867,7 +1929,7 @@ print_optimization_summary(
 
 POPULATION_SIZE = 20
 
-MAX_ITERATIONS = 20
+MAX_ITERATIONS = 5
 population = []
 
 for _ in range(POPULATION_SIZE):
@@ -2090,6 +2152,10 @@ for iteration in range(MAX_ITERATIONS):
                 best_score = new_score
 
                 best_solution = new_solution.copy()
+    print(
+        f"Best F1 Score: "
+        f"{best_score:.4f}"
+    )
 
 
 end = time.time()
@@ -2143,7 +2209,9 @@ plot_training_loss(
 
     tlbo_model,
 
-    "TLBO Optimized MLP Training Loss"
+    "TLBO Optimized MLP Training Loss",
+
+    "06_tlbo_training_loss.png"
 
 )
 print_optimization_summary(

@@ -1,0 +1,7 @@
+Method,Evaluations,Resource Units
+Random Search,6,3000
+Bayesian Optimization,6,3000
+Hyperband,12,3000
+LEA,6,3000
+TLBO,6,3000
+Simulated Annealing,6,3000

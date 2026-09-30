@@ -12,6 +12,13 @@ from sklearn.metrics import silhouette_score
 OUTPUT_DIR = "processed_datasets"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+VISUALIZATION_DIR = os.path.join(
+    OUTPUT_DIR,
+    "appliance_energy_visualizations"
+)
+
+os.makedirs(VISUALIZATION_DIR, exist_ok=True)
+
 print("\nSTARTING DATASET PREPARATION")
 print("=" * 80)
 
@@ -93,7 +100,17 @@ plt.xlabel("Energy Consumption (Wh)")
 plt.ylabel("Frequency")
 plt.grid(True)
 
+plt.savefig(
+    os.path.join(
+        VISUALIZATION_DIR,
+        "01_appliance_energy_consumption_distribution.png"
+    ),
+    dpi=300,
+    bbox_inches="tight"
+)
+
 plt.show()
+plt.close()
 
 # The target distribution indicates potential groupings.
 # Therefore, K-Means clustering will be applied.
@@ -160,9 +177,18 @@ plt.plot(
 plt.title("Elbow Method")
 plt.xlabel("Number of Clusters (k)")
 plt.ylabel("WCSS")
-plt.grid(True)
+plt.savefig(
+    os.path.join(
+        VISUALIZATION_DIR,
+        "02_elbow_method.png"
+    ),
+    dpi=300,
+    bbox_inches="tight"
+)
 
 plt.show()
+plt.close()
+
 # The Elbow Method indicates that the reduction in WCSS
 # begins to slow down after k = 5. Therefore, k = 5 is
 # considered a candidate for the optimal number of clusters.
@@ -199,6 +225,31 @@ for k in range(2, 11):
     silhouette_scores.append(score)
 
     print(f"k = {k}, Silhouette Score = {score:.4f}")
+
+plt.figure(figsize=(8, 5))
+
+plt.plot(
+    range(2, 11),
+    silhouette_scores,
+    marker="o"
+)
+
+plt.title("Silhouette Score for Different Numbers of Clusters")
+plt.xlabel("Number of Clusters (k)")
+plt.ylabel("Silhouette Score")
+plt.grid(True)
+
+plt.savefig(
+    os.path.join(
+        VISUALIZATION_DIR,
+        "03_silhouette_score.png"
+    ),
+    dpi=300,
+    bbox_inches="tight"
+)
+
+plt.show()
+plt.close()
 # The Silhouette Score ranges from -1 to 1, where values
 # closer to 1 indicate well-separated and compact clusters.
 # Although k = 2 achieved the highest Silhouette Score (0.8462),
@@ -250,8 +301,17 @@ plt.ylabel("Appliance Energy Consumption (Wh)")
 plt.colorbar(label="Cluster")
 plt.grid(True)
 
-plt.show()
+plt.savefig(
+    os.path.join(
+        VISUALIZATION_DIR,
+        "04_kmeans_energy_clusters.png"
+    ),
+    dpi=300,
+    bbox_inches="tight"
+)
 
+plt.show()
+plt.close()
 cluster_mapping = {
     0: "Very Low",
     2: "Low",

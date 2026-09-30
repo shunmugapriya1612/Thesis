@@ -1,0 +1,8 @@
+,activity,evolution,previous 24 hour flare activity,historically-complex,became complex on this pass,area,area of largest spot
+activity,1.0,-0.016,0.421,0.269,0.133,0.261,0.007
+evolution,-0.016,1.0,-0.048,-0.154,0.031,0.058,0.041
+previous 24 hour flare activity,0.421,-0.048,1.0,0.173,0.078,0.256,0.16
+historically-complex,0.269,-0.154,0.173,1.0,0.087,0.192,0.052
+became complex on this pass,0.133,0.031,0.078,0.087,1.0,0.057,0.063
+area,0.261,0.058,0.256,0.192,0.057,1.0,0.032
+area of largest spot,0.007,0.041,0.16,0.052,0.063,0.032,1.0
